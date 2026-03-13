@@ -1,0 +1,12 @@
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/bin/Debug/net9.0/ChessEngine.deps.json
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/bin/Debug/net9.0/ChessEngine.dll
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/bin/Debug/net9.0/ChessEngine.pdb
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.AssemblyInfoInputs.cache
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.AssemblyInfo.cs
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.csproj.CoreCompileInputs.cache
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.sourcelink.json
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.dll
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/refint/ChessEngine.dll
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ChessEngine.pdb
+/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/Debug/net9.0/ref/ChessEngine.dll

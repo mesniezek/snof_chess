@@ -1,0 +1,13 @@
+<div class="chess-board">
+  <ng-container *ngFor="let row of board; let i = index">
+    <div *ngFor="let cell of row; let j = index"
+         class="square"
+         [class.dark]="(i + j) % 2 !== 0"
+         [class.selected]="selectedSquare?.row === i && selectedSquare?.col === j"
+         (click)="onSquareClick(i, j)">
+
+      {{ getPieceIcon(cell) }}
+
+    </div>
+  </ng-container>
+</div>

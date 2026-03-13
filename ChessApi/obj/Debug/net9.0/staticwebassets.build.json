@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "+RUL/GhF4sh4M7xmamojwhAnawG2qmJSxeAiQJKN8M4=",
+  "Source": "ChessApi",
+  "BasePath": "_content/ChessApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

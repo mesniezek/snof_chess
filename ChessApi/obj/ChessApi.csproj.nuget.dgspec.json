@@ -1,0 +1,147 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/mikolaj/RiderProjects/ChessEngine/ChessApi/ChessApi.csproj": {}
+  },
+  "projects": {
+    "/Users/mikolaj/RiderProjects/ChessEngine/ChessApi/ChessApi.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/mikolaj/RiderProjects/ChessEngine/ChessApi/ChessApi.csproj",
+        "projectName": "ChessApi",
+        "projectPath": "/Users/mikolaj/RiderProjects/ChessEngine/ChessApi/ChessApi.csproj",
+        "packagesPath": "/Users/mikolaj/.nuget/packages/",
+        "outputPath": "/Users/mikolaj/RiderProjects/ChessEngine/ChessApi/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/mikolaj/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/ChessEngine.csproj": {
+                "projectPath": "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/ChessEngine.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[9.0.1, )"
+            },
+            "Microsoft.OpenApi": {
+              "target": "Package",
+              "version": "[1.6.22, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[7.2.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/ChessEngine.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/ChessEngine.csproj",
+        "projectName": "ChessEngine",
+        "projectPath": "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/ChessEngine.csproj",
+        "packagesPath": "/Users/mikolaj/.nuget/packages/",
+        "outputPath": "/Users/mikolaj/RiderProjects/ChessEngine/ChessEngine/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/mikolaj/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
