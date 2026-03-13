@@ -13,6 +13,7 @@ yarn-error.log
 
 # IDEs and editors
 .idea/
+.idea/.idea.ChessEngine/.idea
 .project
 .classpath
 .c9/
