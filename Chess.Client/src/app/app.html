@@ -1,13 +1,57 @@
-<div class="chess-board">
-  <ng-container *ngFor="let row of board; let i = index">
-    <div *ngFor="let cell of row; let j = index"
-         class="square"
-         [class.dark]="(i + j) % 2 !== 0"
-         [class.selected]="selectedSquare?.row === i && selectedSquare?.col === j"
-         (click)="onSquareClick(i, j)">
+<div class="game-container">
+  @if (board && board.length > 0) {
+    <div class="chess-board">
+      @for (row of board; track $index; let i = $index) {
+        @for (cell of row; track $index; let j = $index) {
 
-      {{ getPieceIcon(cell) }}
+          <div class="square"
+               [class.dark]="(i + j) % 2 !== 0"
+               [class.selected]="selectedSquare?.row === i && selectedSquare?.col === j"
+               [class.badmove]="badSquare?.row === i && badSquare?.col === j"
+               (click)="onSquareClick(i, j)">
 
+            <img *ngIf="cell" [src]="getPiecePath(cell)" class="piece-img">
+
+            <div *ngIf="isLegalMove(i, j)" class="legal-move-dot"></div>
+
+          </div>
+
+        }
+      }
     </div>
-  </ng-container>
+  } @else {
+    <div class="loading-screen">
+      <p>Inicjalizacja szachownicy...</p>
+    </div>
+  }
+
+  <div class="side-panel">
+    <div class="timer black-timer" [class.active-clock]="activeColor === 'black'">
+      <span>Czarny:</span>
+      <span class="time">{{ formatTime(blackTime) }}</span>
+    </div>
+
+    <div class="taken-pieces black-pices">
+      <div class="current-count black">
+        {{ blackAdvantage > 0 ? '+' : '' }}{{ blackAdvantage }}
+      </div>
+    </div>
+
+    <div class="current-info">
+      <button class="reset-btn" (click)="onNewGame()">Nowa Gra</button>
+      <p>Aktualny czas:</p>
+      <h3>{{ currentTime }}</h3>
+    </div>
+
+    <div class="taken-pieces">
+      <div class="current-count white">
+        {{ whiteAdvantage > 0 ? '+' : '' }}{{ whiteAdvantage }}
+      </div>
+    </div>
+
+    <div class="timer white-timer" [class.active-clock]="activeColor === 'white'">
+      <span>Biały:</span>
+      <span class="time">{{ formatTime(whiteTime) }}</span>
+    </div>
+  </div>
 </div>

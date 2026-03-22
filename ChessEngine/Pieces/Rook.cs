@@ -4,7 +4,7 @@ namespace ChessEngine.Pieces;
 
 public class Rook : Piece
 {
-    public Rook(PieceColor color) : base(color, PieceType.Rook) { }
+    public Rook(PieceColor color, Position position) : base(color, PieceType.Rook, position) { }
 
     public override bool IsValidMove(Position from, Position to, Board board)
     {

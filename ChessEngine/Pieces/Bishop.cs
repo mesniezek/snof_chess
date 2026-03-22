@@ -5,7 +5,7 @@ namespace ChessEngine.Pieces;
 
 public class Bishop : Piece
 {
-    public Bishop(PieceColor color) : base(color, PieceType.Bishop) { }
+    public Bishop(PieceColor color, Position position) : base(color, PieceType.Bishop, position) { }
 
     public override bool IsValidMove(Position from, Position to, Board board)
     {
