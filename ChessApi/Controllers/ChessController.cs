@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ChessEngine;
+using ChessEngine.Enums;
+using ChessEngine.Pieces;
 
 namespace ChessApi.Controllers;
 
@@ -33,5 +35,33 @@ public class ChessController : ControllerBase
         }
         
         return BadRequest(new { message = "Legal move validation failed or path blocked!" });
+    }
+
+    [HttpGet("legal-moves")]
+    public IActionResult GetLegalMoves([FromQuery] int row, [FromQuery] int col)
+    {
+        var pos = new Position(row, col);
+        var piece = _board.GetPiece(pos);
+
+        if (piece == null) 
+            return NotFound(new { message = "No piece at this position" });
+
+        var legalMoves = piece.GetLegalMoves(_board);
+    
+        return Ok(legalMoves.Select(p => new { p.Row, p.Col }));
+    }
+    
+    [HttpPost("reset")]
+    public IActionResult ResetBoard()
+    {
+        _board.InitializeBoard(); 
+        return Ok(_board.ToDto());
+    }
+    
+    [HttpGet("advantage")]
+    public IActionResult CheckAdvantage(PieceColor color)
+    {
+        var advantage = _board.GetAdvantage(color);
+        return Ok(new { advantage });
     }
 }

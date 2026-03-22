@@ -4,7 +4,7 @@ namespace ChessEngine.Pieces;
 
 public class Knight : Piece
 {
-    public Knight(PieceColor color) : base(color, PieceType.Knight) { }
+    public Knight(PieceColor color, Position position) : base(color, PieceType.Knight, position) { }
 
     public override bool IsValidMove(Position from, Position to, Board board)
     {

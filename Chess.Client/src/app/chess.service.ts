@@ -14,4 +14,17 @@ export class ChessService {
     const body = { fromRow, fromCol, toRow, toCol };
     return this.http.post<string[][]>('https://localhost:7081/api/chess/move', body);
   }
+
+  getLegalMoves(row: number, col: number): Observable<{ row: number, col: number }[]> {
+    return this.http.get<{ row: number, col: number }[]>(`https://localhost:7081/api/chess/legal-moves?row=${row}&col=${col}`);
+  }
+
+  resetBoard(): Observable<string[][]> {
+    return this.http.post<string[][]>('https://localhost:7081/api/chess/reset', {});
+  }
+
+  getAdvantage(color: 'white' | 'black'): Observable<number> {
+    const colorNumber = color === 'white' ? 1 : 2;
+    return this.http.get<number>(`https://localhost:7081/api/chess/advantage?color=${colorNumber}`);
+  }
 }

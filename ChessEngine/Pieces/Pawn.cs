@@ -5,7 +5,7 @@ namespace ChessEngine.Pieces;
 
 public class Pawn : Piece
 {
-    public Pawn(PieceColor color) : base(color, PieceType.Pawn) { }
+    public Pawn(PieceColor color, Position position) : base(color, PieceType.Pawn, position) { }
 
     public override bool IsValidMove(Position from, Position to, Board board)
     {
