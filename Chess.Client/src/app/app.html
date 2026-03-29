@@ -1,19 +1,18 @@
 <div class="game-container">
-  @if (board && board.length > 0) {
+  @if (state.board() && state.board().length > 0) {
     <div class="chess-board">
-      @for (row of board; track $index; let i = $index) {
+      @for (row of state.board(); track $index; let i = $index) {
         @for (cell of row; track $index; let j = $index) {
 
           <div class="square"
                [class.dark]="(i + j) % 2 !== 0"
-               [class.selected]="selectedSquare?.row === i && selectedSquare?.col === j"
+               [class.selected]="state.selectedSquare()?.row === i && state.selectedSquare()?.col === j"
                [class.badmove]="badSquare?.row === i && badSquare?.col === j"
+               [class.checked]="isKingInCheck(i, j)"
                (click)="onSquareClick(i, j)">
 
             <img *ngIf="cell" [src]="getPiecePath(cell)" class="piece-img">
-
             <div *ngIf="isLegalMove(i, j)" class="legal-move-dot"></div>
-
           </div>
 
         }
@@ -26,32 +25,32 @@
   }
 
   <div class="side-panel">
-    <div class="timer black-timer" [class.active-clock]="activeColor === 'black'">
+    <div class="timer black-timer" [class.active-clock]="timer.activeColor() === 'black'">
       <span>Czarny:</span>
-      <span class="time">{{ formatTime(blackTime) }}</span>
+      <span class="time">{{ timer.format(timer.blackTime()) }}</span>
     </div>
 
     <div class="taken-pieces black-pices">
       <div class="current-count black">
-        {{ blackAdvantage > 0 ? '+' : '' }}{{ blackAdvantage }}
+        {{ state.blackAdvantage() > 0 ? '+' : '' }}{{ state.blackAdvantage() }}
       </div>
     </div>
 
     <div class="current-info">
       <button class="reset-btn" (click)="onNewGame()">Nowa Gra</button>
       <p>Aktualny czas:</p>
-      <h3>{{ currentTime }}</h3>
+      <h3>{{ timer.currentTime() }}</h3>
     </div>
 
     <div class="taken-pieces">
       <div class="current-count white">
-        {{ whiteAdvantage > 0 ? '+' : '' }}{{ whiteAdvantage }}
+        {{ state.whiteAdvantage() > 0 ? '+' : '' }}{{ state.whiteAdvantage() }}
       </div>
     </div>
 
-    <div class="timer white-timer" [class.active-clock]="activeColor === 'white'">
+    <div class="timer white-timer" [class.active-clock]="timer.activeColor() === 'white'">
       <span>Biały:</span>
-      <span class="time">{{ formatTime(whiteTime) }}</span>
+      <span class="time">{{ timer.format(timer.whiteTime()) }}</span>
     </div>
   </div>
 </div>

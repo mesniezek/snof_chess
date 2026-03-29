@@ -18,6 +18,11 @@ public abstract class Piece
         PieceType.King => int.MaxValue,
         _ => throw new ArgumentOutOfRangeException()
     };
+    
+    public virtual List<Position> GetAttackedFields(Board board) 
+    {
+        return new List<Position>(); 
+    }
 
     protected Piece(PieceColor color, PieceType type, Position position)
     {

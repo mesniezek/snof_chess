@@ -57,6 +57,11 @@
   animation: shake 0.3s;
 }
 
+.square.checked {
+  background-color: #d34dff !important;
+  animation: pulse 1s infinite;
+}
+
 .legal-move-dot {
   width: 30px;
   height: 30px;

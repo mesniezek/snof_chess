@@ -1,6 +1,8 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChessService } from './chess.service';
+import {GameTimerService} from './game-timer.service';
+import {GameStateService} from './game-state.service';
 
 @Component({
   selector: 'app-root',
@@ -10,177 +12,74 @@ import { ChessService } from './chess.service';
   styleUrl: './app.scss'
 })
 export class App implements OnInit, OnDestroy {
-  board: string[][] = [];
-  legalMoves: { row: number, col: number }[] = [];
-  currentTime: string = '';
-  whiteTime = 600;
-  blackTime = 600;
-  activeColor: 'white' | 'black' = 'white';
-  gameStarted = false;
-  timerInterval: any;
-  whiteAdvantage = 0;
-  blackAdvantage = 0;
-
-  constructor(private chessService: ChessService, private cdr: ChangeDetectorRef) {}
-
-  ngOnInit() {
-    this.loadBoard();
-    this.gameStarted = true;
-    this.updateAdvantages();
-
-    if (this.timerInterval) clearInterval(this.timerInterval);
-
-    this.timerInterval = setInterval(() => {
-      this.updateTime();
-
-      if (this.gameStarted) {
-        if (this.activeColor === 'white') {
-          this.whiteTime = Math.max(0, this.whiteTime - 1);
-        } else {
-          this.blackTime = Math.max(0, this.blackTime - 1);
-        }
-
-        if (this.whiteTime === 0 || this.blackTime === 0) {
-          this.gameStarted = false;
-          alert("Koniec czasu!");
-        }
-      }
-
-      this.cdr.detectChanges();
-    }, 1000);
-  }
-
-  ngOnDestroy() {
-    if (this.timerInterval) clearInterval(this.timerInterval);
-  }
-
-  formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  updateTime() {
-    const now = new Date();
-    this.currentTime = now.toLocaleTimeString('pl-PL', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  }
-
-  selectedSquare: { row: number, col: number } | null = null;
   badSquare: { row: number, col: number } | null = null;
 
-  onSquareClick(row: number, col: number) {
-    const clickedPiece = this.board[row][col];
+  constructor(
+    private chessService: ChessService,
+    public timer: GameTimerService,
+    public state: GameStateService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-    if (this.selectedSquare?.row === row && this.selectedSquare?.col === col) {
-      this.selectedSquare = null;
-      this.legalMoves = [];
+  ngOnInit() {
+    this.loadInitialData();
+    this.timer.startClock();
+  }
+
+  ngOnDestroy() { this.timer.stop(); }
+
+  private loadInitialData() {
+    this.chessService.getBoard().subscribe(data => this.state.updateFromDto(data));
+    this.state.updateAdvantages();
+  }
+
+  onSquareClick(row: number, col: number) {
+    const clickedPiece = this.state.board()[row][col];
+    const selected = this.state.selectedSquare();
+
+    if (selected?.row === row && selected?.col === col) {
+      this.state.selectedSquare.set(null);
       return;
     }
 
-    if (this.selectedSquare && this.isLegalMove(row, col)) {
-      this.chessService.movePiece(this.selectedSquare.row, this.selectedSquare.col, row, col).subscribe({
-        next: (newBoard) => {
-          this.board = [...newBoard];
-          this.selectedSquare = null;
-          this.legalMoves = [];
-
-          this.gameStarted = true;
-          this.updateAdvantages();
-          this.activeColor = this.activeColor === 'white' ? 'black' : 'white';
-          this.cdr.detectChanges();
+    if (selected && this.isLegalMove(row, col)) {
+      this.chessService.movePiece(selected.row, selected.col, row, col).subscribe({
+        next: (data) => {
+          this.state.updateFromDto(data);
+          this.state.updateAdvantages();
+          this.timer.switchTurn();
         },
         error: () => this.handleBadMove(row, col)
       });
       return;
     }
 
-    if (clickedPiece !== "") {
-      const pieceColor = clickedPiece[0] === 'w' ? 'white' : 'black';
-      if (pieceColor === this.activeColor) {
-        this.selectedSquare = { row, col };
-        this.legalMoves = [];
-        this.chessService.getLegalMoves(row, col).subscribe(moves => {
-          this.legalMoves = moves;
-          this.cdr.detectChanges();
-        });
-      }
-      return;
+    if (clickedPiece !== "" && clickedPiece[0] === (this.timer.activeColor() === 'white' ? 'w' : 'b')) {
+      this.state.selectedSquare.set({ row, col });
+      this.chessService.getLegalMoves(row, col).subscribe(moves => this.state.legalMoves.set(moves));
+    } else {
+      this.state.selectedSquare.set(null);
+      this.state.legalMoves.set([]);
     }
-    else {
-      this.selectedSquare = null;
-      this.legalMoves = [];
-      this.cdr.detectChanges();
-    }
-  }
-
-  handleBadMove(row: number, col: number) {
-    this.badSquare = { row, col };
-    this.selectedSquare = null;
-    this.legalMoves = [];
-    setTimeout(() => this.badSquare = null, 300);
-  }
-
-  getPiecePath(piece: string): string {
-    if (!piece) return '';
-
-    return `/assets/chess-icons/${piece}.svg`;
-  }
-
-  isLegalMove(row: number, col: number): boolean {
-    return this.legalMoves.some(m => m.row === row && m.col === col);
-  }
-
-  loadBoard() {
-    this.chessService.getBoard().subscribe(data => {
-      this.board = [...data];
-      this.cdr.detectChanges();
-    });
   }
 
   onNewGame() {
-    if (confirm("Czy na pewno chcesz rozpocząć nową grę?")) {
-      this.chessService.resetBoard().subscribe({
-        next: (newBoard) => {
-          this.board = [...newBoard];
-
-          this.whiteTime = 600;
-          this.blackTime = 600;
-          this.activeColor = 'white';
-          this.gameStarted = false;
-          this.selectedSquare = null;
-          this.legalMoves = [];
-
-          this.cdr.detectChanges();
-
-          console.log("Gra zresetowana pomyślnie");
-          this.gameStarted = true;
-          this.whiteAdvantage = 0;
-          this.blackAdvantage = 0;
-        },
-        error: (err) => console.error("Błąd podczas resetu gry:", err)
-      });
-    }
+    if (!confirm("Czy na pewno?")) return;
+    this.chessService.resetBoard().subscribe(data => {
+      this.state.reset(data);
+      this.timer.reset();
+    });
   }
 
-  updateAdvantages() {
-    this.chessService.getAdvantage('white').subscribe({
-      next: (res: any) => {
-        this.whiteAdvantage = res && typeof res === 'object' ? (res.value ?? res.advantage ?? 0) : (res ?? 0);
-        this.cdr.detectChanges();
-      },
-      error: () => this.whiteAdvantage = 0
-    });
+  isKingInCheck(row: number, col: number): boolean {
+    const p = this.state.board()[row][col];
+    return (p === 'wK' && this.state.whiteInCheck()) || (p === 'bK' && this.state.blackInCheck());
+  }
 
-    this.chessService.getAdvantage('black').subscribe({
-      next: (res: any) => {
-        this.blackAdvantage = res && typeof res === 'object' ? (res.value ?? res.advantage ?? 0) : (res ?? 0);
-        this.cdr.detectChanges();
-      },
-      error: () => this.blackAdvantage = 0
-    });
+  isLegalMove = (r: number, c: number) => this.state.legalMoves().some(m => m.row === r && m.col === c);
+  getPiecePath = (p: string) => p ? `/assets/chess-icons/${p}.svg` : '';
+  handleBadMove(row: number, col: number) {
+    this.badSquare = { row, col };
+    setTimeout(() => { this.badSquare = null; this.cdr.detectChanges(); }, 300);
   }
 }

@@ -8,6 +8,8 @@ public class Board
     private readonly Piece?[,] _squares = new Piece?[8, 8];
     private PieceColor _lastMovedColor = PieceColor.Black;
     private int _materialBalance = 0;
+    private HashSet<Position> _whiteAttackMap = new();
+    private HashSet<Position> _blackAttackMap = new();
 
     public Board()
     {
@@ -48,28 +50,35 @@ public class Board
 
     public Piece? GetPiece(Position pos) => _squares[pos.Row, pos.Col];
     
-    public string[][] ToDto()
+    public class GameStateDto
     {
-        var dto = new string[8][];
+        public string[][] Board { get; set; }
+        public bool WhiteInCheck { get; set; }
+        public bool BlackInCheck { get; set; }
+    }
+    
+    public GameStateDto ToDto()
+    {
+        var boardDto = new string[8][];
         for (var i = 0; i < 8; i++)
         {
-            dto[i] = new string[8];
+            boardDto[i] = new string[8];
             for (var j = 0; j < 8; j++)
             {
                 var piece = _squares[i, j];
-                if (piece == null)
-                {
-                    dto[i][j] = "";
-                    continue;
-                }
-
+                if (piece == null) { boardDto[i][j] = ""; continue; }
                 var colorPrefix = piece.Color == PieceColor.White ? "w" : "b";
                 var typeChar = piece.Type == PieceType.Knight ? 'N' : piece.Type.ToString()[0];
-            
-                dto[i][j] = $"{colorPrefix}{typeChar}";
+                boardDto[i][j] = $"{colorPrefix}{typeChar}";
             }
         }
-        return dto;
+
+        return new GameStateDto
+        {
+            Board = boardDto,
+            WhiteInCheck = IsKingChecked(PieceColor.White),
+            BlackInCheck = IsKingChecked(PieceColor.Black)
+        };
     }
     
     public bool IsPathClear(Position from, Position to)
@@ -100,29 +109,38 @@ public class Board
     {
         var piece = _squares[from.Row, from.Col];
         var target = _squares[to.Row, to.Col];
-        
-        if (piece == null) return false;
-        
-        if (piece.Color == _lastMovedColor) return false;
-        
+    
+        if (piece == null || piece.Color == _lastMovedColor) return false;
         if (target != null && target.Color == piece.Color) return false;
-
         if (!piece.IsValidMove(from, to, this)) return false;
+        
+        var originalTarget = _squares[to.Row, to.Col];
+        _squares[to.Row, to.Col] = piece;
+        _squares[from.Row, from.Col] = null;
+        var originalPos = piece.CurrentPosition;
+        piece.CurrentPosition = to;
+        
+        UpdateAttackMaps();
+
+        if (IsKingChecked(piece.Color))
+        {
+            _squares[from.Row, from.Col] = piece;
+            _squares[to.Row, to.Col] = originalTarget;
+            piece.CurrentPosition = originalPos;
+            UpdateAttackMaps();
+            Console.WriteLine("Ruch nielegalny - król byłby szachowany!");
+            return false;
+        }
         
         if (target != null)
         {
-            int multiplier = (piece.Color == PieceColor.White) ? 1 : -1;
+            var multiplier = (piece.Color == PieceColor.White) ? 1 : -1;
             _materialBalance += (target.Value * multiplier);
         }
-        
-        _squares[to.Row, to.Col] = piece;
-        _squares[from.Row, from.Col] = null;
-        
-        piece.HasMoved = true;
-        piece.CurrentPosition = to;
-        
-        _lastMovedColor = piece.Color;
 
+        piece.HasMoved = true;
+        _lastMovedColor = piece.Color;
+        
         return true;
     }
     
@@ -145,5 +163,54 @@ public class Board
             return _materialBalance > 0 ? _materialBalance : 0;
         
         return _materialBalance < 0 ? Math.Abs(_materialBalance) : 0;
+    }
+
+    public bool IsKingChecked(PieceColor kingColor)
+    {
+        Position kingPos = FindKing(kingColor);
+        PieceColor enemyColor = kingColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+    
+        return IsFieldUnderAttack(kingPos, enemyColor);
+    }
+    
+    private void UpdateAttackMaps()
+    {
+        _whiteAttackMap.Clear();
+        _blackAttackMap.Clear();
+
+        for (var r = 0; r < 8; r++) {
+            for (var c = 0; c < 8; c++) {
+                var piece = _squares[r, c];
+                if (piece == null) continue;
+
+                var attacked = piece.GetAttackedFields(this);
+                if (piece.Color == PieceColor.White)
+                    foreach (var pos in attacked) _whiteAttackMap.Add(pos);
+                else
+                    foreach (var pos in attacked) _blackAttackMap.Add(pos);
+            }
+        }
+    }
+
+    public bool IsFieldUnderAttack(Position pos, PieceColor attackerColor)
+    {
+        return attackerColor == PieceColor.White ? _whiteAttackMap.Contains(pos) : _blackAttackMap.Contains(pos);
+    }
+    
+    public Position FindKing(PieceColor color)
+    {
+        for (var r = 0; r < 8; r++)
+        {
+            for (var c = 0; c < 8; c++)
+            {
+                var piece = _squares[r, c];
+                if (piece != null && piece.Type == PieceType.King && piece.Color == color)
+                {
+                    return new Position(r, c);
+                }
+            }
+        }
+        
+        throw new Exception($"Król koloru {color} zniknął z planszy!");
     }
 }
