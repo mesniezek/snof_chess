@@ -8,9 +8,12 @@ export class GameStateService {
   blackInCheck = signal(false);
   whiteAdvantage = signal(0);
   blackAdvantage = signal(0);
-
+  isGameOver = signal(false);
+  winner = signal<string | null>(null);
   selectedSquare = signal<{ row: number, col: number } | null>(null);
   legalMoves = signal<{ row: number, col: number }[]>([]);
+  whiteCapturedPieces = signal<string[]>([]);
+  blackCapturedPieces = signal<string[]>([]);
 
   constructor(private chessService: ChessService) {}
 
@@ -18,8 +21,12 @@ export class GameStateService {
     this.board.set(data.board);
     this.whiteInCheck.set(data.whiteInCheck);
     this.blackInCheck.set(data.blackInCheck);
+    this.isGameOver.set(data.isGameOver || false);
+    this.winner.set(data.winner || null);
     this.selectedSquare.set(null);
     this.legalMoves.set([]);
+    this.whiteCapturedPieces.set(data.whiteCapturedPieces || []);
+    this.blackCapturedPieces.set(data.blackCapturedPieces || []);
   }
 
   updateAdvantages() {

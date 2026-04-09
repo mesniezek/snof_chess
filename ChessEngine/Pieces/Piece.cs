@@ -41,11 +41,14 @@ public abstract class Piece
             for (var col = 0; col < 8; col++)
             {
                 var to = new Position(row, col);
+                if (!IsValidMove(CurrentPosition, to, board)) continue;
+            
                 var target = board.GetPiece(to);
-
                 if (target != null && target.Color == this.Color) continue;
 
-                if (IsValidMove(CurrentPosition, to, board))
+                var originalPos = this.CurrentPosition;
+            
+                if (board.SimulateAndCheckIfSafe(originalPos, to, this.Color))
                 {
                     legalMoves.Add(to);
                 }
