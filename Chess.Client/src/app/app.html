@@ -1,38 +1,59 @@
 <div class="game-container">
-  @if (state.board() && state.board().length > 0) {
-    <div class="chess-board">
-      @for (row of state.board(); track $index; let i = $index) {
-        @for (cell of row; track $index; let j = $index) {
+  <div class="board-relative-wrapper" style="position: relative;">
 
-          <div class="square"
-               [class.dark]="(i + j) % 2 !== 0"
-               [class.selected]="state.selectedSquare()?.row === i && state.selectedSquare()?.col === j"
-               [class.badmove]="badSquare?.row === i && badSquare?.col === j"
-               [class.checked]="isKingInCheck(i, j)"
-               (click)="onSquareClick(i, j)">
+    @if (state.board() && state.board().length > 0) {
+      <div class="chess-board">
+        @for (row of state.board(); track $index; let i = $index) {
+          @for (cell of row; track $index; let j = $index) {
 
-            <img *ngIf="cell" [src]="getPiecePath(cell)" class="piece-img">
-            <div *ngIf="isLegalMove(i, j)" class="legal-move-dot"></div>
-          </div>
+            <div class="square"
+                 [class.dark]="(i + j) % 2 !== 0"
+                 [class.selected]="state.selectedSquare()?.row === i && state.selectedSquare()?.col === j"
+                 [class.badmove]="badSquare?.row === i && badSquare?.col === j"
+                 [class.checked]="isKingInCheck(i, j)"
+                 (click)="onSquareClick(i, j)">
 
+              <img *ngIf="cell" [src]="getPiecePath(cell)" class="piece-img">
+              <div *ngIf="isLegalMove(i, j)" class="legal-move-dot"></div>
+            </div>
+
+          }
         }
-      }
-    </div>
-  } @else {
-    <div class="loading-screen">
-      <p>Inicjalizacja szachownicy...</p>
-    </div>
-  }
+      </div>
+    } @else {
+      <div class="loading-screen">
+        <p>Inicjalizacja szachownicy...</p>
+      </div>
+    }
+
+    @if (state.isGameOver()) {
+      <div class="game-over-overlay">
+        <div class="message-card">
+          <h2>SZACHMAT!</h2>
+          <p>Zwycięzca: <strong>{{ state.winner() === 'White' ? 'Białe' : 'Czarne' }}</strong></p>
+          <button class="reset-btn-overlay" (click)="onNewGame()">Zagraj ponownie</button>
+        </div>
+      </div>
+    }
+  </div>
 
   <div class="side-panel">
-    <div class="timer black-timer" [class.active-clock]="timer.activeColor() === 'black'">
-      <span>Czarny:</span>
-      <span class="time">{{ timer.format(timer.blackTime()) }}</span>
-    </div>
 
-    <div class="taken-pieces black-pices">
-      <div class="current-count black">
-        {{ state.blackAdvantage() > 0 ? '+' : '' }}{{ state.blackAdvantage() }}
+    <div class="color-group">
+      <div class="timer black-timer" [class.active-clock]="timer.activeColor() === 'black'">
+        <span>Czarny:</span>
+        <span class="time">{{ timer.format(timer.blackTime()) }}</span>
+      </div>
+
+      <div class="taken-pieces black-pieces">
+        <div class="captured-icons">
+          @for (p of state.blackCapturedPieces(); track $index) {
+            <img [src]="getPiecePath(p)" class="captured-img">
+          }
+        </div>
+        <div class="current-count black">
+          {{ state.blackAdvantage() > 0 ? '+' : '' }}{{ state.blackAdvantage() }}
+        </div>
       </div>
     </div>
 
@@ -42,15 +63,23 @@
       <h3>{{ timer.currentTime() }}</h3>
     </div>
 
-    <div class="taken-pieces">
-      <div class="current-count white">
-        {{ state.whiteAdvantage() > 0 ? '+' : '' }}{{ state.whiteAdvantage() }}
+    <div class="color-group">
+      <div class="taken-pieces">
+        <div class="captured-icons">
+          @for (p of state.whiteCapturedPieces(); track $index) {
+            <img [src]="getPiecePath(p)" class="captured-img">
+          }
+        </div>
+        <div class="current-count white">
+          {{ state.whiteAdvantage() > 0 ? '+' : '' }}{{ state.whiteAdvantage() }}
+        </div>
+      </div>
+
+      <div class="timer white-timer" [class.active-clock]="timer.activeColor() === 'white'">
+        <span>Biały:</span>
+        <span class="time">{{ timer.format(timer.whiteTime()) }}</span>
       </div>
     </div>
 
-    <div class="timer white-timer" [class.active-clock]="timer.activeColor() === 'white'">
-      <span>Biały:</span>
-      <span class="time">{{ timer.format(timer.whiteTime()) }}</span>
-    </div>
   </div>
 </div>

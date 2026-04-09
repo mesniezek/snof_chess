@@ -10,6 +10,8 @@ public class Board
     private int _materialBalance = 0;
     private HashSet<Position> _whiteAttackMap = new();
     private HashSet<Position> _blackAttackMap = new();
+    private readonly List<string> _whiteCapturedPieces = new();
+    private readonly List<string> _blackCapturedPieces = new();
 
     public Board()
     {
@@ -52,32 +54,29 @@ public class Board
     
     public class GameStateDto
     {
-        public string[][] Board { get; set; }
+        public string[][] Board { get; set; } = null!;
         public bool WhiteInCheck { get; set; }
         public bool BlackInCheck { get; set; }
+        public bool IsGameOver { get; set; }
+        public string? Winner { get; set; }
+        public List<string> WhiteCapturedPieces { get; set; } = new();
+        public List<string> BlackCapturedPieces { get; set; } = new();
     }
-    
+
     public GameStateDto ToDto()
     {
-        var boardDto = new string[8][];
-        for (var i = 0; i < 8; i++)
-        {
-            boardDto[i] = new string[8];
-            for (var j = 0; j < 8; j++)
-            {
-                var piece = _squares[i, j];
-                if (piece == null) { boardDto[i][j] = ""; continue; }
-                var colorPrefix = piece.Color == PieceColor.White ? "w" : "b";
-                var typeChar = piece.Type == PieceType.Knight ? 'N' : piece.Type.ToString()[0];
-                boardDto[i][j] = $"{colorPrefix}{typeChar}";
-            }
-        }
+        bool whiteCheckmated = IsCheckmate(PieceColor.White);
+        bool blackCheckmated = IsCheckmate(PieceColor.Black);
 
         return new GameStateDto
         {
-            Board = boardDto,
+            Board = MapBoardToArray(),
             WhiteInCheck = IsKingChecked(PieceColor.White),
-            BlackInCheck = IsKingChecked(PieceColor.Black)
+            BlackInCheck = IsKingChecked(PieceColor.Black),
+            WhiteCapturedPieces = new List<string>(_whiteCapturedPieces),
+            BlackCapturedPieces = new List<string>(_blackCapturedPieces),
+            IsGameOver = whiteCheckmated || blackCheckmated,
+            Winner = whiteCheckmated ? "Black" : (blackCheckmated ? "White" : null)
         };
     }
     
@@ -134,6 +133,13 @@ public class Board
         
         if (target != null)
         {
+            var pieceCode = (target.Color == PieceColor.White ? "w" : "b") + 
+                            (target.Type == PieceType.Knight ? "N" : target.Type.ToString()[0]);
+            
+            if (piece.Color == PieceColor.White)
+                _whiteCapturedPieces.Add(pieceCode);
+            else
+                _blackCapturedPieces.Add(pieceCode);
             var multiplier = (piece.Color == PieceColor.White) ? 1 : -1;
             _materialBalance += (target.Value * multiplier);
         }
@@ -155,6 +161,8 @@ public class Board
         }
         _lastMovedColor = PieceColor.Black;
         _materialBalance = 0;
+        _whiteCapturedPieces.Clear();
+        _blackCapturedPieces.Clear();
     }
     
     public int GetAdvantage(PieceColor color)
@@ -212,5 +220,70 @@ public class Board
         }
         
         throw new Exception($"Król koloru {color} zniknął z planszy!");
+    }
+    
+    private string[][] MapBoardToArray()
+    {
+        var boardDto = new string[8][];
+        for (var i = 0; i < 8; i++)
+        {
+            boardDto[i] = new string[8];
+            for (var j = 0; j < 8; j++)
+            {
+                var piece = _squares[i, j];
+                if (piece == null) { boardDto[i][j] = ""; continue; }
+                
+                var colorPrefix = piece.Color == PieceColor.White ? "w" : "b";
+                var typeChar = piece.Type == PieceType.Knight ? 'N' : piece.Type.ToString()[0];
+                boardDto[i][j] = $"{colorPrefix}{typeChar}";
+            }
+        }
+        return boardDto;
+    }
+    
+    public bool IsCheckmate(PieceColor color)
+    {
+        if (!IsKingChecked(color)) return false;
+
+        for (int r = 0; r < 8; r++)
+        {
+            for (int c = 0; c < 8; c++)
+            {
+                var piece = _squares[r, c];
+                if (piece != null && piece.Color == color)
+                {
+                    var moves = piece.GetLegalMoves(this);
+                    if (moves.Count > 0) return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    
+    public bool SimulateAndCheckIfSafe(Position from, Position to, PieceColor color)
+    {
+        var piece = _squares[from.Row, from.Col];
+        var target = _squares[to.Row, to.Col];
+        
+        var originalFromPiece = _squares[from.Row, from.Col];
+        var originalToPiece = _squares[to.Row, to.Col];
+        var originalPiecePos = piece!.CurrentPosition;
+        
+        _squares[to.Row, to.Col] = piece;
+        _squares[from.Row, from.Col] = null;
+        piece.CurrentPosition = to;
+        
+        UpdateAttackMaps();
+        
+        bool isSafe = !IsKingChecked(color);
+        
+        _squares[from.Row, from.Col] = originalFromPiece;
+        _squares[to.Row, to.Col] = originalToPiece;
+        piece.CurrentPosition = originalPiecePos;
+        
+        UpdateAttackMaps();
+
+        return isSafe;
     }
 }
